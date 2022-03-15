@@ -13,7 +13,7 @@ public class TransactionServiceImpl implements TransactionService {
 
     @Override
     public void addTransaction(Transaction transaction){
-        statistics.addNewTransaction(transaction.getAmount().doubleValue());
+        statistics.addNewTransaction(transaction.getAmount());
     }
 
     @Override

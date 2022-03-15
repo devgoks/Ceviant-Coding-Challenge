@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Map;
 
 import static org.springframework.http.HttpStatus.UNPROCESSABLE_ENTITY;
@@ -21,7 +22,7 @@ public class TransactionController {
     private TransactionService transactionService;
 
     @PostMapping("/transactions")
-    public ResponseEntity addTransaction(@RequestBody Transaction transaction) {
+    public ResponseEntity addTransaction(@RequestBody @Valid Transaction transaction) {
         if (DateUtil.isInFuture(transaction.getTimestamp())) {
             return new ResponseEntity(UNPROCESSABLE_ENTITY);
         } else if (DateUtil.withinLastMinute(transaction.getTimestamp().getTime())) {

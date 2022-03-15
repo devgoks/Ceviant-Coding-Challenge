@@ -1,52 +1,62 @@
 package com.ceviant.coding.challenge.exercise1.model;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 public class Statistics {
 
-    private double max;
+    private BigDecimal max;
 
-    private double min;
+    private BigDecimal min;
 
-    private double sum;
+    private BigDecimal sum;
 
-    private double avg;
+    private BigDecimal avg;
 
     private long count;
 
     private ReentrantReadWriteLock lock = new ReentrantReadWriteLock(true);
 
-    public double getMax() {
+    public Statistics () {
+        this.max = BigDecimal.ZERO;
+        this.min = BigDecimal.ZERO;
+        this.avg = BigDecimal.ZERO;
+        this.sum = BigDecimal.ZERO;
+        this.count = 0;
+    }
+
+    public BigDecimal getMax() {
         return max;
     }
 
-    public void setMax(double max) {
+    public void setMax(BigDecimal max) {
         this.max = max;
     }
 
-    public double getMin() {
+    public BigDecimal getMin() {
         return min;
     }
 
-    public void setMin(double min) {
+    public void setMin(BigDecimal min) {
         this.min = min;
     }
 
-    public double getSum() {
+    public BigDecimal getSum() {
         return sum;
     }
 
-    public void setSum(double sum) {
+    public void setSum(BigDecimal sum) {
         this.sum = sum;
     }
 
-    public double getAvg() {
+    public BigDecimal getAvg() {
         return avg;
     }
 
-    public void setAvg(double avg) {
+    public void setAvg(BigDecimal avg) {
         this.avg = avg;
     }
 
@@ -74,22 +84,20 @@ public class Statistics {
         this.lock.writeLock().unlock();
     }
 
-    public void addNewTransaction(double transactionAmount) {
+    public void addNewTransaction(BigDecimal transactionAmount) {
 
         this.lockForWrite();
 
-        if (this.count == 0) {
-            this.max = transactionAmount;
+        if (this.count == 0){
             this.min = transactionAmount;
-        } else if (transactionAmount > this.max) {
             this.max = transactionAmount;
-        } else if (transactionAmount < this.min) {
-            this.min = transactionAmount;
+        }else {
+            this.min = transactionAmount.min(this.min);
+            this.max = transactionAmount.max(this.max);
         }
-
-        this.sum = this.sum + transactionAmount;
+        this.sum = this.sum.add(transactionAmount);
         this.count = this.count + 1;
-        this.avg = sum / count;
+        this.avg = sum.divide(new BigDecimal(count), RoundingMode.HALF_UP);
 
         this.releaseWriteLock();
     }
@@ -99,11 +107,10 @@ public class Statistics {
         Map<String, Object> snapshot = new HashMap<>();
 
         this.lockForRead();
-
-        snapshot.put("sum", this.sum);
-        snapshot.put("avg", this.avg);
-        snapshot.put("max", this.max);
-        snapshot.put("min", this.min);
+        snapshot.put("sum", this.sum.toString());
+        snapshot.put("avg", this.avg.toString());
+        snapshot.put("max", this.max.toString());
+        snapshot.put("min", this.min.toString());
         snapshot.put("count", this.count);
 
         this.releaseReadLock();
@@ -115,10 +122,10 @@ public class Statistics {
 
         this.lockForWrite();
 
-        this.max = 0;
-        this.min = 0;
-        this.avg = 0;
-        this.sum = 0;
+        this.max = BigDecimal.ZERO;
+        this.min = BigDecimal.ZERO;
+        this.avg = BigDecimal.ZERO;
+        this.sum = BigDecimal.ZERO;
         this.count = 0;
 
         this.releaseWriteLock();
